@@ -59,5 +59,49 @@ grid on;
 ylim([-40 0]);
 xlim([-90 90]);
 
+%% 2-D acoustic field map
+
+theta0_deg = 15;
+theta0 = deg2rad(theta0_deg);
+
+phi = -k*x*sin(theta0);
+
+% Room coordinates
+xField = linspace(-1.5,1.5,500);
+yField = linspace(0.2,3,500);
+
+[X,Y] = meshgrid(xField,yField);
+
+P = zeros(size(X));
+
+for n = 1:N
+
+    r = sqrt((X-x(n)).^2 + Y.^2);
+
+    P = P + ...
+        exp(1j*phi(n)) .* ...
+        exp(-1j*k*r) ./ r;
+
+end
+
+P_dB = 20*log10(abs(P)/max(abs(P(:))) + eps);
+
+figure;
+
+imagesc(xField,yField,P_dB);
+
+axis xy;
+axis equal;
+xlim([-1.5 1.5]);
+ylim([0 3]);
+
+colorbar;
+caxis([-30 0]);
+
+xlabel('Horizontal Position (m)');
+ylabel('Distance from Speaker (m)');
+title(sprintf('40 kHz Acoustic Field Steered to %d°', ...
+    theta0_deg));
+
 yline(-6,'--','-6 dB Beam Boundary');
 xline(theta0_deg,'--','Desired Steering Angle');
